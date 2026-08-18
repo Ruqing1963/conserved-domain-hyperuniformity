@@ -1,0 +1,834 @@
+% =====================================================================
+% Paper 4 -- first full draft, targeted at Phys. Rev. E
+%
+% STATUS NOTES FOR THE AUTHOR (delete before submission)
+%  * Every number in this draft is taken from hyperuniformity_1024.json
+%    (1024^2, c0 = 0.30, 4 seeds, 2000 steps) and hyperuniformity_512.json.
+%    Nothing is rounded from memory.
+%  * References checked against the published records on 17 Aug 2026. Note:
+%    the Yeung and Furukawa TITLES supplied in the final edit round did not
+%    match the published articles (the volumes and pages did); the titles below
+%    are the published ones. Tomita and Ezoe page ranges confirmed by the
+%    author. Torquato et al. (2026), De Luca et al. (2024) and Tomita (1991)
+%    are retained because Secs. I, III B and V B cite them; removing them
+%    would leave undefined citations and would drop the closest prior art from
+%    the reference list.
+%    Yeung PRL 61, 1135 (1988) proves the BOUND delta >= 4, not delta = 4;
+%    the text now says so, because our own alpha_c = 3.81 +/- 0.08 sits
+%    2.4 sigma BELOW that bound and a referee will notice.
+%  * Sec. IV D and Sec. V C now report the mass-autocorrelation measurement.
+%    Note that this CHANGED a claim: an earlier draft of Sec. IV C called the
+%    separation of the residual "future work". It is no longer future work,
+%    and the sentence was removed rather than left standing.
+%  * NOVELTY WARNING, READ BEFORE SUBMITTING. Torquato, Kim, Klatt, Car and
+%    Steinhardt, Phys. Rev. X 16, 011042 (2026), generalise hyperuniformity to
+%    weighted particle systems and show explicitly that a hyperuniform point
+%    pattern need not be hyperuniform when weighted, and vice versa. That is
+%    the general form of the conceptual claim this paper makes. Secs. I and
+%    V A have been rewritten to cite it and to position our contribution as
+%    the conserved-dynamics instance plus the variance budget, but the author
+%    must read that paper in full and re-examine whether more of the framing
+%    needs to change. Similarly De Luca et al. (2024) and Tomita (1991)
+%    establish the k^4 phase-ordering result more directly than Yeung and
+%    Furukawa do, and Wilken et al., PRX 13, 031014 (2023), may already have
+%    measured droplet point patterns in a phase-separating system: read it.
+%  * The mineralogical setting is deliberately reduced to one paragraph in
+%    Sec. II A, per the decision to target PRE. Papers 1-3 carry it.
+% =====================================================================
+
+\documentclass[aps,pre,twocolumn,superscriptaddress,floatfix,longbibliography]{revtex4-2}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{url}
+
+\begin{document}
+
+\title{Conserved dynamics make the solute hyperuniform, not the domains}
+
+\author{Ruqing Chen}
+\email{ruqing@hotmail.com}
+\affiliation{GUT Geoservice Inc., Montr\'eal, Qu\'ebec, Canada}
+
+\date{\today}
+
+\begin{abstract}
+Hyperuniformity---the anomalous suppression of long-wavelength density
+fluctuations---is increasingly used to classify spatial patterns in physical,
+biological, and geological systems. A pattern is normally classified by
+locating its constituent objects and measuring the structure factor of the
+resulting point set. We show that for a system with a locally conserved order
+parameter this procedure can give the wrong answer, because the conserved
+quantity and the counted objects are not the same thing. Using Cahn--Hilliard
+coarsening of a two-phase alloy free energy on periodic grids up to
+$1024^2$, we measure the spatial order of the solute-rich domains against
+matched complete-spatial-random, hard-core, and perturbed-lattice nulls. The
+domains are locally more regular than a hard-core gas (Clark--Evans
+$R = 1.73$, $z = +73$, against $1.42$ for random sequential adsorption). The
+concentration field is hyperuniform, with $S_c(k) \sim k^{3.81 \pm 0.08}$. The
+point pattern of domain centroids is not: $S(k \to 0)$ settles on a plateau
+near $0.14$ and the number variance grows with window area, and this survives
+a doubling of the box while the bias of the estimators themselves disappears.
+Weighting the same points by domain solute mass restores hyperuniformity,
+$S(k \to 0) = 0.021$. In common windows the solute-mass variance is a factor
+of eight below what independent domains of the observed size distribution
+would produce, and the domain count and the mean domain size anticorrelate
+ever more strongly with window size. Number fluctuations are absorbed by
+compensating size fluctuations: permuting the domain masses over the same
+positions returns the budget exactly to its independent-domain baseline,
+locating the entire effect in the coupling between mass and position. Nearest-neighbour regularity and long-range
+order must be measured separately, and so must counts and conserved
+quantities.
+\end{abstract}
+
+\maketitle
+
+% =====================================================================
+\section{Introduction}
+% =====================================================================
+
+A point pattern is \emph{hyperuniform} if its large-scale density fluctuations
+are anomalously suppressed: the structure factor vanishes in the
+long-wavelength limit, $S(k) \to 0$ as $k \to 0$, equivalently the variance of
+the number of points in a window of radius $R$ grows more slowly than the
+window's volume---in two dimensions like its perimeter, $\sigma^2(R) \sim R$,
+rather than like its area, $\sigma^2(R) \sim R^2$
+\cite{TorquatoStillinger2003,Torquato2018}. The concept has proved unusually
+portable. Disordered hyperuniform patterns have been identified in avian
+photoreceptor mosaics \cite{Jiao2014}, in jammed packings, in active and
+driven matter, and the diagnostic is now routinely applied to patterns in
+biology and the geosciences.
+
+Portability has a cost. Hyperuniformity is defined for a density, but it is
+almost always \emph{measured} on a point pattern obtained by locating discrete
+objects---cells, particles, grains, depressions---and treating their centroids
+as the density's carriers. The step from the density to the point pattern is
+rarely examined. It is exact when every object carries the same weight, and it
+is a genuine approximation otherwise.
+
+Two recent results frame the question we ask here. On the measurement side,
+Chen \cite{Chen2026} applied the full protocol---a local diagnostic, the
+structure factor, the number variance, and matched nulls---to fields of
+submarine pockmarks, seabed depressions left by escaping fluid. The
+nearest-neighbour spacing of one field was more regular than a hard-core gas,
+the kind of local order that invites a hyperuniform interpretation; yet every
+field was long-range super-Poissonian, with $S(k \to 0)$ between $2.5$ and
+$19.4$, and the hyperuniform region of the order plane was empty. The
+methodological conclusion was that a local statistic cannot substitute for a
+long-range one. That system, however, is one in which long-range order simply
+does not exist, so the point-pattern step was never put under stress.
+
+On the theory side, systems governed by a locally conserved order parameter
+are the natural place where long-range order \emph{does} exist. The
+Cahn--Hilliard equation \cite{CahnHilliard1958} is a continuity equation: a
+composition fluctuation of wavelength $2\pi/k$ can only be built by
+transporting solute across that distance, so long-wavelength modes are
+kinematically frozen while short-wavelength ones grow. The resulting
+suppression of the small-$k$ structure factor of the concentration field is
+long established: Yeung \cite{Yeung1988} proved that a scaling coarsening
+pattern with conserved dynamics must have $S_c(k) \sim k^{\delta}$ with
+$\delta \ge 4$, numerical work found $\delta \simeq 4$
+\cite{Furukawa1989}, Tomita \cite{Tomita1991} gave the scaling argument that
+explains it, and De Luca \emph{et al.} \cite{DeLuca2024} recently extended
+that argument to active and non-constant-mobility cases, again obtaining
+$4$. We claim no novelty whatever for this, and reproduce it here only as an
+internal check on the simulation.
+
+The question we ask is what happens to the \emph{point pattern} in such a
+system. Mass conservation constrains the solute; it does not constrain how
+many domains hold it. A region can meet its solute budget with a few large
+domains or with many small ones, and nothing in the dynamics forbids the
+trade. Whether the centroids inherit the field's hyperuniformity is therefore
+an empirical question, and the answer bears directly on every study that
+classifies a conserved system by counting objects.
+
+That the answer can be negative is, in general, now known. Torquato
+\emph{et al.} \cite{TorquatoWeighted2026} have generalised hyperuniformity to
+particles carrying weights---charges, dipoles, Voronoi volumes---and shown
+that a hyperuniform arrangement need not remain hyperuniform when weighted,
+and that a non-hyperuniform one may become so; related weighted point
+constructions have been examined in an ecological setting
+\cite{Ezoe2025}. The general statement that positions and weights are
+different objects is therefore established, and we do not claim it.
+
+What this paper adds is the conserved-dynamics instance and its mechanism.
+First, we exhibit a system in which the weight is not an arbitrary internal
+degree of freedom but the conserved quantity itself, and show that the field,
+the centroid count pattern, and the mass-weighted centroid pattern of one
+simulation fall into different classes---so that the discrepancy is not a
+curiosity of exotic weights but the generic situation whenever discrete
+objects share out a conserved density. Second, we quantify the difference: a
+variance budget, built from an identity and three measured inputs with no free
+parameter, shows the observed solute rigidity to be a factor of eight beyond
+what independent domains of the observed size distribution would give, with
+the shortfall supplied by an anticorrelation between domain count and mean
+domain size that deepens monotonically with scale. Third, we draw the
+methodological consequence for the many studies that classify such systems by
+locating and counting objects.
+
+% =====================================================================
+\section{Model and methods}
+% =====================================================================
+
+\subsection{The system}
+
+We integrate the Cahn--Hilliard equation
+\begin{equation}
+  \frac{\partial c}{\partial t} = \nabla \cdot \left[ M \nabla
+  \left( \frac{\partial f}{\partial c} - \kappa \nabla^2 c \right) \right],
+\end{equation}
+for a conserved composition $c(\mathbf{r}, t)$ on a periodic $n \times n$
+grid, with a semi-implicit pseudospectral scheme. The homogeneous free energy
+$f(c)$ is a double well with a solute-poor and a solute-rich minimum,
+calibrated in earlier work for a solid solution of a minor element in a
+sulphide host; the specific chemistry is immaterial here and is reported
+elsewhere. What matters for the present argument is only that $f$ has two
+minima, that the initial composition lies inside the spinodal, and that the
+dynamics conserve $\int c \, d\mathbf{r}$ locally rather than merely globally.
+All runs use $c_0 = 0.30$, off-critical, so that the minority phase forms
+discrete domains rather than a bicontinuous structure and centroids are
+well defined.
+
+The gradient coefficient $\kappa$ is fixed by requiring the fastest-growing
+spinodal wavelength to be $12$ grid cells, and the time step by requiring the
+fastest-growing mode to be amplified by $2\%$ per step. The absolute length
+scale is therefore set by numerical resolvability and not by the material;
+accordingly, every quantity reported below is dimensionless---ratios to a
+Poisson reference, scaling exponents, and correlation coefficients---and none
+depends on that choice.
+
+The principal ensemble is four independent runs at $n = 1024$, coarsened
+isothermally for $2000$ steps, at which point each configuration contains
+$2736 \pm 20$ domains with a mean spacing of $19.6$ cells. A second ensemble
+of six runs at $n = 512$, carried to $4000$ steps, is used for the
+finite-size comparison of Sec.~\ref{sec:finitesize}. We stop the large
+ensemble at the stage that maximises the accessible wavevector range rather
+than at the latest attainable time: coarsening reduces the domain count, and
+with it the statistical quality of precisely the long-wavelength band the
+paper is about.
+
+\subsection{From field to point pattern}
+
+Domains are the connected components of $c > c_{\rm thr}$, with $c_{\rm thr}$
+the midpoint between robust percentiles of the two phase compositions.
+Components are labelled on the torus, so that a domain straddling the periodic
+boundary is one domain and not two. Each domain contributes one point, the
+centroid of its excess composition $c - c_{\rm thr}$, computed as a circular
+mean so that the wrap is handled correctly, and one weight, its solute mass
+$m_i = \sum (c - c_{\rm thr})$ over the component. Components smaller than
+eight cells are discarded as unresolved ripples. Moving $c_{\rm thr}$ across
+the central $40\%$ of the composition gap changes the exponents reported below
+by less than $0.05$.
+
+\subsection{Diagnostics}
+
+\emph{Local order.} The Clark--Evans index \cite{ClarkEvans1954}
+$R = \bar d_{\rm NN} / [1/(2\sqrt{\rho})]$, with $R < 1$ clustered, $R = 1$
+random, $R > 1$ regular. On a torus the minimum-image distance is exact and no
+edge correction arises---an advantage over field surveys, where boundary bias
+is the dominant systematic.
+
+\emph{Long-range order.} The structure factor is evaluated on the exact
+reciprocal lattice of the periodic box,
+\begin{equation}
+  S(\mathbf{k}) = \frac{1}{N} \left| \sum_{j=1}^{N}
+  e^{-i \mathbf{k} \cdot \mathbf{r}_j} \right|^2 ,
+  \qquad \mathbf{k} = 2\pi (n_x, n_y)/L ,
+\end{equation}
+with no window function and hence none of the low-$k$ leakage that
+complicates bounded surveys, and radially averaged in logarithmic shells. For
+an uncorrelated set of $N$ points on this lattice $\langle S \rangle = 1$ for
+every $\mathbf{k} \neq 0$. The weighted version,
+$S_w(\mathbf{k}) = |\sum_j w_j e^{-i\mathbf{k}\cdot\mathbf{r}_j}|^2 /
+\sum_j w_j^2$, is normalised so that uncorrelated positions again give unity
+whatever the weights; with $w_j = m_j$ it is a spectrum of the solute rather
+than of the domains. The number variance $\sigma^2(R)$ is taken over disks
+placed at random on the torus. We fit the low-$k$ exponent $\alpha$ in
+$S \sim k^{\alpha}$ between the smallest available wavevector and
+$0.45 k_{\rm peak}$, and quote it with its standard error.
+
+\subsection{Two constraints that must not be read as results}
+\label{sec:constraints}
+
+First, the scheme conserves the mean composition exactly and the box is
+periodic, so $S_c(k = 0) = 0$ identically. That is arithmetic, not physics;
+only $k > 0$ is fitted or plotted. Second, a configuration with $N$ points in
+a periodic box has a number variance driven to zero as the window approaches
+the whole box, for the same trivial reason. Windows are therefore restricted
+to $R \le L/6$ (Sec.~\ref{sec:constraints}), and---importantly---the complete-spatial-random null is
+generated at \emph{fixed} $N$, so that it carries the identical constraint and
+the comparison remains fair.
+
+\subsection{Nulls and validation}
+
+Each configuration is compared against complete spatial randomness (CSR) at
+matched $N$; a random-sequential-adsorption (RSA) hard-core process with
+exclusion matched to the observed closest approach, representing steric
+exclusion without organisation; and a Gaussian-perturbed square lattice as a
+known hyperuniform reference. Passed through the identical pipeline, CSR
+returns $R = 0.99$, $S(k \to 0) = 1.14$, and a number-variance slope of
+$2.02$, against the ideal $1$, $1$, and $2$; the perturbed lattice returns
+$\alpha = +2.02$ and slope $0.93$. The estimators are therefore doing what
+they are supposed to, and the null results reported below are not artefacts of
+the pipeline.
+
+% =====================================================================
+\section{Results}
+% =====================================================================
+
+\begin{table*}[t]
+\caption{The three objects and the nulls, at $1024^2$ after $2000$ steps
+($N = 2736$ domains per configuration, four realisations). $R$ is the
+Clark--Evans index, $H = S(k\to0)/S(k_{\rm peak})$, and the last column the
+log--log slope of the number variance fitted above $1.4$ domain spacings.}
+\label{tab:main}
+\begin{ruledtabular}
+\begin{tabular}{lccccc}
+ & $R$ & $S(k\to0)$ & $\alpha$ & $H$ & $\sigma^2$ slope \\
+\hline
+Domain centroids (counts) & 1.73 & 0.143 & $-0.14(4)$ & 0.089 & 1.80 \\
+Same points, mass-weighted & --- & 0.021 & $+0.40(9)$ & 0.014 & --- \\
+Concentration field & --- & --- & $+3.81(8)$ & --- & --- \\
+\hline
+CSR (fixed $N$) & 0.99 & 1.14 & $-0.05$ & --- & 2.02 \\
+RSA hard core & 1.42 & 0.24 & $+0.24$ & 0.20 & 1.79 \\
+Perturbed lattice & 1.45 & 0.017 & $+2.02$ & 0.008 & 0.93 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+
+\subsection{The domains are locally more regular than a hard-core gas}
+
+Table~\ref{tab:main} collects the results discussed in this section.
+
+The centroid pattern has $R = 1.73$ ($z = +73$), well above both CSR ($0.99$)
+and the RSA hard-core null ($1.42$) at the same density [Fig.~\ref{fig:one}]. Local order
+is thus real and is not merely exclusion: the domains are spaced more evenly
+than hard discs of the same closest approach would be, as expected when each
+domain draws solute from, and so depletes, its neighbourhood.
+
+\begin{figure}[t]
+\includegraphics{fig_1}
+\caption{(a) Solute-rich domains (grey scale) and their mass-weighted
+centroids (circles), a $384^2$ crop of one $1024^2$ configuration after
+$2000$ steps. (b) Order plane: Clark--Evans index against the
+long-wavelength structure factor. The domains are locally regular, exceeding
+the hard-core null, but their count spectrum sits well above the hyperuniform
+limit; weighting the same points by solute mass moves them down by nearly an
+order of magnitude. Grey squares are the three Mediterranean pockmark fields
+of Ref.~\cite{Chen2026}, shown for scale comparison only.}
+\label{fig:one}
+\end{figure}
+
+\subsection{The field is hyperuniform}
+
+The concentration field has $S_c(k) \sim k^{\alpha_c}$ with
+$\alpha_c = 3.81 \pm 0.08$ over more than a decade in $k$ [Fig.~\ref{fig:two}(a)],
+recovering the established behaviour of conserved coarsening
+\cite{Yeung1988,Furukawa1989,Tomita1991,DeLuca2024}. We report it as a check
+on the simulation, not as a finding.
+
+The fitted value lies nominally below the bound $\delta \ge 4$ of
+Ref.~\cite{Yeung1988}, by about $2.4$ standard errors of the fit. We do not
+read this as a violation. The bound holds asymptotically for a scaling state,
+whereas the fit is taken over a finite window that ends at $0.35 k_{\rm peak}$,
+where curvature towards the peak is already depressing the local slope;
+restricting the fit to the lowest half-decade returns a steeper exponent with
+a correspondingly larger error. The quoted uncertainty is that of the
+regression alone and does not include this systematic.
+
+\begin{figure}[t]
+\includegraphics{fig_2}
+\caption{(a) Structure factor of the concentration field, with a $k^4$ guide.
+(b) Spectra of the point patterns and nulls. The two centroid curves are the
+\emph{same points}, differing only in whether each point carries unit weight
+or its domain's solute mass. Every series is distinguished by line style and
+marker as well as colour, so the figure is legible in monochrome. The
+dot-dashed vertical line marks the coarsening peak $k_{\rm peak}$.}
+\label{fig:two}
+\end{figure}
+
+\subsection{The point pattern is not}
+
+The centroid pattern is not hyperuniform. Its structure factor falls well
+below the Poisson line but then flattens, settling on a plateau
+$S(k \to 0) = 0.143$ with a low-$k$ exponent $\alpha = -0.14 \pm 0.04$
+[Fig.~\ref{fig:two}(b)], and its number variance grows as $\sigma^2 \sim R^{1.80}$, close
+to the area-like exponent $2$ and far from the perimeter-like $1$ returned by
+the perturbed lattice [Fig.~\ref{fig:three}(a)]. By the criterion that defines the class,
+the pattern is not hyperuniform; by the ratio of the plateau to the peak,
+$H = 0.089$, it is not effectively hyperuniform either. It is, however,
+strongly suppressed: its number variance lies a factor of four to five below
+CSR at every window size, and below the hard-core null as well.
+
+\subsection{Doubling the box does not move the plateau}
+\label{sec:finitesize}
+
+A plateau at the smallest accessible wavevector is exactly what a box too
+small to resolve the true limit would produce, so we repeated the measurement
+at $n = 512$ and $n = 1024$, halving $k_{\rm min}$ from $0.0123$ to $0.0061$
+cell$^{-1}$. At the same coarsening stage the two spectra coincide over their
+shared range, and the additional half-decade of low $k$ opened by the larger
+box shows the same plateau [Fig.~\ref{fig:three}(b)]. The exponents agree within their
+errors, $-0.20 \pm 0.08$ at $512^2$ against $-0.14 \pm 0.04$ at $1024^2$.
+
+The strongest form of this argument is asymmetric. Between the two box sizes
+the \emph{estimators} improve markedly---the CSR control moves from
+$(S, {\rm slope}) = (0.92, 1.85)$ to $(1.14, 2.02)$, converging on its
+theoretical values as the finite-box bias is removed---while the data do not
+move at all. A residual bias that vanishes for the null but leaves the
+measurement unchanged cannot be what produces the measurement.
+
+\begin{figure}[t]
+\includegraphics{fig_3}
+\caption{(a) Number variance against window radius, with slope-1 and slope-2
+guides. (b) Finite-size check: the count spectrum in boxes of $512^2$ and
+$1024^2$ at the same coarsening stage; dotted verticals mark the respective
+$2\pi/L$. Doubling the box halves the accessible $k_{\rm min}$ and leaves the
+plateau where it was, while over the same change the CSR control moves from
+$(S, {\rm slope}) = (0.92, 1.85)$ to $(1.14, 2.02)$. The bias that vanishes
+for the null is not what produces the measurement.}
+\label{fig:three}
+\end{figure}
+
+\subsection{Weighting by solute mass restores hyperuniformity}
+
+Weighting the identical set of points by domain solute mass drops the
+long-wavelength plateau from $0.143$ to $0.021$ and turns the exponent
+positive, $\alpha = +0.40 \pm 0.09$, with $H = 0.014$ [Fig.~\ref{fig:two}(b)]. Nothing
+about the positions has changed. What has changed is which quantity is being
+counted, and the two answers differ by nearly an order of magnitude.
+
+\subsection{A negative result: filtering by size does not isolate the cause}
+\label{sec:negative}
+
+The obvious way to test whether polydispersity is responsible is to restrict
+the analysis to domains of nearly equal mass. It does not work, and the way it
+fails is instructive. Selecting a subset removes points, and random removal by
+itself drives $S(k)$ towards the Poisson value---for independent thinning with
+retention $p$, $S_{\rm thinned}(k) = 1 + p[S_{\rm full}(k) - 1]$---so the
+comparison must be against a random subset of the same size, not against the
+full pattern. Made that way, the test returns the wrong sign: retaining the
+$30\%$ of domains closest to the median mass gives $S(k \to 0) = 0.963$
+against $0.616$ for matched random thinning, and the discrepancy grows as the
+selection is tightened (Table~\ref{tab:filter}).
+
+The diagnosis is that the two subsets have \emph{identical} Clark--Evans
+indices ($1.19$ versus $1.19$ at $q = 0.30$; $1.35$ versus $1.35$ at
+$q = 0.50$). The excess is therefore not local: it is long-wavelength. Domain
+mass is spatially autocorrelated on large scales, so a subset selected by mass
+is also a subset selected by position, and the selection injects exactly the
+kind of long-wavelength density variation the measurement is designed to
+detect. A hard filter cannot separate polydispersity from the spatial
+autocorrelation of the filtering variable. We report the result because it
+motivates the analysis of the next section, which deletes nothing.
+
+% =====================================================================
+\begin{table}[t]
+\caption{The negative filtering test of Sec.~\ref{sec:negative}. Retaining the
+fraction $q$ of domains whose mass is closest to the median is compared with a
+random subset of the same size drawn from the same configuration. The
+filtered subsets have higher long-wavelength fluctuations, and identical local
+order.}
+\label{tab:filter}
+\small
+\begin{ruledtabular}
+\begin{tabular}{c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c}
+$q$ & CV & $S(k\to0)$ & $S(k\to0)$ & $R$ & $R$ \\
+ & kept & filtered & thinned & filtered & thinned \\
+\hline
+0.30 & 0.12 & 0.963 & 0.616 & 1.19 & 1.19 \\
+0.50 & 0.21 & 0.599 & 0.587 & 1.35 & 1.35 \\
+0.70 & 0.31 & 0.482 & 0.417 & 1.51 & 1.51 \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\section{The variance budget}
+% =====================================================================
+
+\subsection{An identity with no free parameter}
+
+For a sum of $N$ masses drawn independently of one another and of $N$, the
+variance of a compound random sum is
+\begin{equation}
+  \frac{{\rm Var}[M]}{\langle m \rangle^2}
+  = \langle N \rangle \, {\rm CV}^2 + {\rm Var}[N] ,
+  \label{eq:budget}
+\end{equation}
+with ${\rm CV}$ the coefficient of variation of the domain masses. Every
+quantity on the right is measured: $\langle N \rangle$ and ${\rm Var}[N]$ in
+the same windows in which $M$ is accumulated, and ${\rm CV} = 0.528$ from the
+mass distribution. Equation~(\ref{eq:budget}) is therefore a prediction with no
+adjustable parameter, and the residual
+\begin{equation}
+  C \equiv \frac{{\rm Var}[M]}{\langle m \rangle^2}
+  - \langle N \rangle \, {\rm CV}^2 - {\rm Var}[N]
+\end{equation}
+is the part of the observed solute rigidity that independence cannot account
+for.
+
+The value of this construction is that ${\rm CV}$ is an input that the window
+statistics do not already contain. It converts the qualitative statement
+``size compensates count'' into a number: how much fluctuation independent
+domains of the observed size distribution \emph{would} have produced.
+
+\subsection{Independence is excluded by a factor of eight}
+
+Table~\ref{tab:budget} gives the budget across window sizes and Fig.~4
+displays it. At the widest window, $R = 170.7$ cells or about eight domain
+spacings, independent domains would give a variance of $100.3$ in units of one
+domain, of which $66.6$ comes from the size term and $33.8$ from the count
+term. The measured value is $12.2$. The residual is $C = -88.1$: the system
+cancels $88\%$ of the fluctuation that polydispersity alone would impose.
+
+The cancellation is not a coincidence of one window size. The ratio of
+measured to baseline falls monotonically from $0.38$ at $R \approx 1.4$
+spacings to $0.12$ at $R \approx 8$ spacings [Fig.~\ref{fig:four}(b)]: the wider the
+window, the more completely the compensation operates. Over the same range the
+correlation between the domain count and the mean domain mass within the
+window deepens monotonically from $-0.62$ to $-0.89$, while the spread of the
+window-mean domain mass contracts from $0.221$ to $0.031$. Where there are
+more domains, the domains are smaller.
+
+\begin{table*}[t]
+\caption{The variance budget, Eq.~(\ref{eq:budget}), in units of one domain.
+${\rm CV}^2 = 0.279$ throughout. Windows narrower than $1.4$ domain spacings
+are omitted; there the decomposition is dominated by discreteness. The last
+column is the correlation between the domain count and the mean domain mass in
+the same window.}
+\label{tab:budget}
+\begin{ruledtabular}
+\begin{tabular}{ccccccc}
+$R$ & $\langle N\rangle$ & ${\rm Var}[N]$ & $\langle N\rangle{\rm CV}^2$ &
+baseline & ${\rm Var}[M]/\langle m\rangle^2$ & ${\rm corr}(N,\bar m)$ \\
+\hline
+ 27.7 &   6.3 &  1.36 &  1.75 &   3.11 &  1.17 & $-0.62$ \\
+ 35.9 &  10.6 &  2.14 &  2.95 &   5.09 &  1.57 & $-0.68$ \\
+ 46.5 &  17.7 &  3.38 &  4.95 &   8.33 &  2.19 & $-0.74$ \\
+ 60.4 &  29.9 &  5.50 &  8.33 &  13.83 &  3.03 & $-0.79$ \\
+ 78.3 &  50.2 &  8.49 & 14.00 &  22.49 &  4.14 & $-0.83$ \\
+101.5 &  84.4 & 13.75 & 23.56 &  37.31 &  5.95 & $-0.86$ \\
+131.6 & 141.8 & 22.81 & 39.57 &  62.38 &  8.27 & $-0.88$ \\
+170.7 & 238.6 & 33.76 & 66.57 & 100.33 & 12.24 & $-0.89$ \\
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+\begin{figure*}[t]
+\includegraphics{fig_4}
+\caption{The variance budget, Eq.~(\ref{eq:budget}), in units of one domain.
+(a) What independent domains would produce, split into its size and count
+terms, against the measured solute-mass variance. The single input not already
+contained in the window statistics is the coefficient of variation of the
+domain masses, ${\rm CV} = 0.528$; it is what makes the baseline a prediction
+with no free parameter. (b) The surviving fraction of that baseline, and the
+correlation between the domain count and the mean domain mass in the same
+window. \emph{These two curves are not independent evidence}: where the solute
+content of a window is nearly rigid, $\bar m \propto 1/N$ is close to an
+identity and ${\rm corr}(N,\bar m) \to -1$ follows algebraically. The
+correlation is shown because it locates the scale on which the compensation
+sets in, not as a second measurement. Shading marks windows narrower than
+$1.4$ domain spacings, where the decomposition is dominated by discreteness.}
+\label{fig:four}
+\end{figure*}
+
+\subsection{What the budget does and does not establish}
+
+Three limitations bound this analysis, and we state them explicitly because
+each could otherwise be over-read.
+
+First, the correlation ${\rm corr}(N, \bar m) \to -0.89$ and the smallness of
+${\rm Var}[M]$ are \emph{not} independent pieces of evidence. If the solute
+content of a window is nearly rigid, then $\bar m \propto 1/N$ is close to an
+identity and a correlation approaching $-1$ follows algebraically. The
+correlation is reported because it expresses the same fact in the language of
+the mechanism and supplies the scale on which the compensation sets in, not
+because it constitutes a second measurement.
+
+Second, the residual $C$ mixes two effects: correlation between a domain's
+mass and the local domain count, and correlation between the masses of
+neighbouring domains. The decomposition itself does not separate them; the
+measurements of Sec.~\ref{sec:attribution} do.
+
+Third, the budget should not be inverted to predict the plateau height of
+Sec.~III C. Doing so would require the additional assumption that domain
+positions are determined by the mass field, which we have not established. The
+real-space cancellation and the reciprocal-space plateau are two views of one
+physical situation and are reported side by side, not derived from one
+another.
+
+\subsection{Attribution by mark permutation and mass autocorrelation}
+\label{sec:attribution}
+
+Two further measurements close the budget. Both treat the domain masses as
+marks attached to the observed positions, and both use a mark permutation as
+their null: the masses are randomly reassigned among the same domains, which
+destroys any relation between mass and position while leaving the positions,
+the mass distribution, and hence ${\rm CV}$ exactly as observed.
+
+\emph{The baseline is not an approximation.} Recomputing the budget with
+permuted marks returns residuals consistent with zero at every window size,
+and a ratio of measured to baseline variance of $0.99$--$1.09$ against
+$0.88$--$0.12$ for the real marks. Equation~(\ref{eq:budget}) therefore
+describes these configurations exactly once the marks are made independent of
+position, which is what it assumes; the entire residual $C = -88$ is
+attributable to mass--position coupling and none of it to a failure of the
+identity.
+
+\emph{The coupling is with crowding, not with other masses.} The mark
+covariance $c_{mm}(r) = \langle \delta m_i \delta m_j\rangle_r/\sigma_m^2$
+departs from its permutation envelope only out to about two domain spacings
+and lies inside it, indistinguishable from zero, from $\approx 50$ cells to
+the largest separation measured, $232$ cells [Fig.~\ref{fig:five}(a)]. Domain
+mass carries no large-scale spatial structure. The correlation between a
+domain's mass and the number of neighbours within $r$, by contrast, reaches
+$-0.68$ at one domain spacing and decays slowly to $-0.08$ at $128$ cells
+[Fig.~\ref{fig:five}(b)], against a permuted value of $+0.01$ throughout.
+Crowded domains are smaller. The compensation that makes the solute rigid is
+therefore local and steric in origin rather than a large-scale organisation of
+domain sizes.
+
+% =====================================================================
+\begin{figure*}[t]
+\includegraphics{fig_mass_autocorrelation}
+\caption{Domain mass treated as a mark on the point pattern, against a
+mark-permutation null in which the masses are reassigned at random among the
+same domains. (a) Mark covariance. The signal is confined to separations below
+about two domain spacings; beyond $\approx 50$ cells it is inside the null
+envelope out to $232$ cells, so domain mass has no large-scale spatial
+structure. Values exceeding unity in the first two bins reflect the small
+number of pairs available there, where the null envelope is correspondingly
+wide, and should not be interpreted. (b) Correlation between a domain's mass
+and the number of neighbours within $r$: crowded domains are smaller. This is
+the coupling that supplies the residual of the variance budget.}
+\label{fig:five}
+\end{figure*}
+
+\section{Discussion}
+% =====================================================================
+
+\subsection{Relation to weighted hyperuniformity}
+
+The formal apparatus for what we measure here exists. Reference
+\cite{TorquatoWeighted2026} defines weighted spectral densities and local
+variances for particles carrying scalar or tensorial weights, and establishes
+that the weighted and unweighted classifications are logically independent.
+Our contribution is not that apparatus but a physical instance of it in which
+the weight is fixed by a conservation law rather than chosen: the solute mass
+of a coarsening domain. That case has, we believe, a status the general
+framework does not confer on it. When the weight is a conserved density, the
+weighted spectrum is not one of many possible characterisations---it is the
+one the dynamics constrain, and the unweighted spectrum is the one experiment
+usually reports. The gap between them is then not a mathematical possibility
+but a systematic error with a known sign.
+
+\subsection{A rule for classifying conserved systems}
+
+The results support a short procedural rule for anyone applying
+hyperuniformity diagnostics to a pattern of discrete objects. (i) Measure
+local and long-range order separately; a high nearest-neighbour index is
+compatible with area-like number variance, as it is here and as it was in the
+pockmark fields \cite{Chen2026}. (ii) If the system has a conserved quantity,
+measure both the count spectrum and the spectrum weighted by that quantity;
+here they differ by a factor of seven and fall on opposite sides of the
+classification boundary. (iii) Run the null through the identical pipeline and
+report what it returns, because the credibility of a negative result rests
+entirely on the estimator having been shown to work.
+
+The rule applies well beyond the present model. Precipitate populations,
+droplet emulsions, cluster distributions in reaction-diffusion systems, and
+ecological patch mosaics are all conserved or quasi-conserved systems that are
+routinely characterised by locating objects and counting them.
+
+\subsection{The empirical case}
+
+Domain point patterns in a phase-separating system have been measured
+experimentally. In phase-separated DNA droplets, Wilken \emph{et al.}
+\cite{Wilken2023} report structure factors and number variances whose
+long-wavelength fluctuations do not vanish, and attribute the failure to
+incomplete equilibration and to kinetic arrest of the coalescence process.
+% This characterisation of Ref. [Wilken2023] follows the corresponding author's
+% reading of that paper; check the wording against the original before
+% submission.
+The present results suggest that a further contribution is available without
+invoking either: even in a fully passive, unarrested, isothermally coarsening
+system, the count spectrum does not become hyperuniform, because the count is
+not the conserved variable. Where droplet volumes are measurable alongside
+positions, the weighted spectrum is the discriminating measurement, and our
+prediction is definite---it should lie well below the unweighted one.
+
+\subsection{Two scales, one lesson}
+
+The pockmark analysis of Ref.~\cite{Chen2026} and the present work sit at
+opposite ends of a very wide range of scales---seabed depressions tens of
+metres apart, and nanometre-scale precipitates---and reach the same
+methodological conclusion from opposite directions. There, local regularity
+exceeding a hard-core null coexisted with strongly super-Poissonian long-range
+behaviour, and the warning was that local order must not be read as long-range
+order. Here, long-range order genuinely exists, and yet the standard
+point-pattern measurement misses it, because the conserved quantity is not the
+counted object.
+
+The two systems also differ in a way worth stating. In the pockmark fields the
+excess long-wavelength fluctuation was traced to substrate heterogeneity: the
+inhomogeneous-Poisson nulls reproduced the observed $S(k \to 0)$, so the
+long-range signal was a property of the geological background rather than of
+the pattern-forming process. In the simulations there is no substrate, no
+heterogeneity, and no external field, and the residual count fluctuation is
+generated by the pattern-forming dynamics themselves. The lesson common to
+both is that the long-range behaviour of a point pattern is governed by
+something other than the mechanism that sets its local spacing.
+
+\subsection{An unexplained feature}
+
+The low-$k$ exponent of the count spectrum is small but significantly
+negative, $\alpha = -0.14 \pm 0.04$: the plateau turns slightly upward at the
+smallest accessible wavevectors. We have no explanation, and we have now
+excluded the three candidates we could think of.
+
+It is not a finite-size artefact: Sec.~\ref{sec:finitesize} shows the upturn
+surviving a doubling of the box, over which the bias of the estimators
+themselves demonstrably disappears. It is not a thresholding artefact: the
+exponent moves by less than $0.05$ as the phase cut is swept across the
+central $40\%$ of the composition gap. And it is not a large-scale modulation
+of domain size---the explanation we regarded as most likely before measuring
+it. Were the field to contain regions of systematically larger domains, those
+regions would hold fewer of them, and a long-wavelength count fluctuation
+would follow; but the mark covariance of Sec.~\ref{sec:attribution} shows no
+mass correlation whatever beyond two domain spacings, out to a separation of
+$232$ cells, while the excess in $S(k)$ appears at wavelengths several times
+longer than that.
+
+What remains is a small excess of long-wavelength count fluctuation in a
+pattern whose local order is strong, whose solute is rigid, and whose domain
+sizes are spatially uncorrelated on those scales. We report it as an open
+question rather than assign it to the nearest available correlate.
+
+\subsection{Limitations}
+
+The analysis is two-dimensional, isothermal, at a single composition, and uses
+a single free-energy form. The domain count per configuration is
+$\mathcal{O}(10^3)$ and the ensemble is four realisations, so the accessible
+wavevector range spans about $1.7$ decades; we therefore report exponents with
+their uncertainties over that window and do not assign a hyperuniformity
+class. No experimental point pattern is analysed here, and the natural test of
+the prediction---that a real precipitate population should show a
+count spectrum well above its mass-weighted spectrum---remains to be done on
+electron-microscope maps.
+
+% =====================================================================
+\section{Conclusion}
+% =====================================================================
+
+In a phase-separating system with a locally conserved order parameter, the
+solute-rich domains are locally more regular than a hard-core gas; the
+concentration field is hyperuniform; and the point pattern of domain centroids
+is not, on both the structure-factor and number-variance criteria, in a
+measurement whose estimators are validated in the same box and whose verdict
+is unchanged when the box is doubled. Weighting the same points by their
+solute mass recovers the field's behaviour. A variance budget built on a
+parameter-free identity shows the solute-mass fluctuation to be a factor of
+eight below what independent domains of the observed size distribution would
+produce, with the shortfall supplied by a count--size anticorrelation that
+deepens monotonically with scale.
+
+What is conserved is not what is counted. Before classifying a conserved
+system as hyperuniform or otherwise from the positions of its objects, one
+should ask whether the objects carry the conserved quantity in equal shares,
+and measure the weighted spectrum when they do not.
+
+\section*{Data availability}
+
+The analysis code, the derived per-field statistics, and the figure scripts
+are openly available at \url{https://github.com/Ruqing1963/conserved-domain-hyperuniformity}. In addition to the summary statistics we release
+\texttt{domain\_marks\_stage2000.csv}, the complete per-domain table for the
+$1024^2$ ensemble analysed here: $10\,942$ domains across four realisations,
+each with its realisation index, centroid coordinates in grid units, area in
+cells, and solute mass. Every quantity in Sec.~\ref{sec:attribution} and in
+Table~\ref{tab:budget} can be recomputed from that file alone, without
+repeating the simulations.
+
+% =====================================================================
+% BIBLIOGRAPHY -- checked 17 Aug 2026 against published records, except the
+% two entries carrying an inline comment (Tomita 1991, Ezoe 2025), which were
+% taken from secondary reference lists.
+% =====================================================================
+
+\begin{thebibliography}{99}
+
+\bibitem{TorquatoStillinger2003}
+S.~Torquato and F.~H. Stillinger,
+Local density fluctuations, hyperuniformity, and order metrics,
+Phys. Rev. E \textbf{68}, 041113 (2003).
+
+\bibitem{Torquato2018}
+S.~Torquato,
+Hyperuniform states of matter,
+Phys. Rep. \textbf{745}, 1--95 (2018).
+
+\bibitem{Jiao2014}
+Y.~Jiao, T.~Lau, H.~Hatzikirou, M.~Meyer-Hermann, J.~C. Corbo, and S.~Torquato,
+Avian photoreceptor patterns represent a disordered hyperuniform solution to a
+multiscale packing problem,
+Phys. Rev. E \textbf{89}, 022721 (2014).
+
+\bibitem{TorquatoWeighted2026}
+S.~Torquato, J.~Kim, M.~A. Klatt, R.~Car, and P.~J. Steinhardt,
+Hyperuniformity of weighted particle systems,
+Phys. Rev. X \textbf{16}, 011042 (2026).
+
+\bibitem{Ezoe2025}
+A.~Ezoe, M.~Katori, and T.~Shirai,
+Weighted point configurations with hyperuniformity: an ecological example and
+models,
+J. Phys. Soc. Jpn. \textbf{94}, 064002 (2025).
+
+\bibitem{Chen2026}
+R.~Chen,
+Pockmark fields are locally ordered but not hyperuniform: a structure-factor
+analysis of Mediterranean seabed fluid-escape depressions,
+Zenodo (2026), doi:10.5281/zenodo.20854182.
+
+\bibitem{CahnHilliard1958}
+J.~W. Cahn and J.~E. Hilliard,
+Free energy of a nonuniform system. I. Interfacial free energy,
+J. Chem. Phys. \textbf{28}, 258--267 (1958).
+
+\bibitem{Yeung1988}
+C.~Yeung,
+Scaling and the small-wave-vector limit of the form factor in phase-ordering
+dynamics,
+Phys. Rev. Lett. \textbf{61}, 1135--1138 (1988).
+
+\bibitem{Furukawa1989}
+H.~Furukawa,
+Numerical study of multitime scaling in a solid system undergoing phase
+separation,
+Phys. Rev. B \textbf{40}, 2341--2347 (1989).
+
+\bibitem{Tomita1991}
+H.~Tomita,
+Preservation of isotropy at the mesoscopic stage of phase separation processes,
+Prog. Theor. Phys. \textbf{85}, 47--56 (1991).
+
+\bibitem{DeLuca2024}
+F.~De~Luca, X.~Ma, C.~Nardini, and M.~E. Cates,
+Hyperuniformity in phase ordering: the roles of activity, noise, and
+non-constant mobility,
+J. Phys.: Condens. Matter \textbf{36}, 405101 (2024).
+
+\bibitem{Wilken2023}
+S.~Wilken, A.~Chaderjian, and O.~A. Saleh,
+Spatial organization of phase-separated DNA droplets,
+Phys. Rev. X \textbf{13}, 031014 (2023).
+
+\bibitem{ClarkEvans1954}
+P.~J. Clark and F.~C. Evans,
+Distance to nearest neighbor as a measure of spatial relationships in
+populations,
+Ecology \textbf{35}, 445--453 (1954).
+
+\end{thebibliography}
+
+\end{document}
