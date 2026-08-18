@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite the paper below."
+title: "conserved-domain-hyperuniformity: analysis code and data"
+abstract: >-
+  Structure-factor, number-variance and variance-budget analysis of
+  Cahn-Hilliard coarsening, showing that the concentration field is
+  hyperuniform while the point pattern of domain centroids is not, and
+  that weighting the points by domain solute mass restores hyperuniformity.
+type: software
+authors:
+  - family-names: Chen
+    given-names: Ruqing
+    affiliation: "GUT Geoservice Inc., Montreal, Quebec, Canada"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"   # FILL IN before release
+repository-code: "https://github.com/Ruqing1963/conserved-domain-hyperuniformity"
+license: MIT
+version: "1.0.0"
+date-released: "2026-08-17"   # CHECK before release
+keywords:
+  - hyperuniformity
+  - Cahn-Hilliard
+  - phase-field
+  - spinodal decomposition
+  - point process
+  - structure factor
+preferred-citation:
+  type: article
+  title: "Conserved dynamics make the solute hyperuniform, not the domains"
+  authors:
+    - family-names: Chen
+      given-names: Ruqing
+  year: 2026
+  # journal, volume, pages, doi: FILL IN once accepted
